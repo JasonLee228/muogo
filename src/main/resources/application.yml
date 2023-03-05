@@ -5,7 +5,7 @@ spring:
     username: root
     password: root
   jwt:
-    secretKey: JJWCJHLCGCBG13245
+    secretKey: eHvDTPtYtZi21GXoHBzkMEAWu5GAD1qJt2v8s3rceYY
   jpa:
     show-sql: true
     hibernate:
@@ -46,3 +46,14 @@ spring:
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
+
+
+# custom
+custom:
+  spoty-server:
+    api:
+      url: http://127.0.0.1:8080
+    front:
+      url: http://127.0.0.1:8080
+    google:
+      api-key: AIzaSyDW57XSqpNBPHYybL9-eg8zqCmoJ8F-UTw
