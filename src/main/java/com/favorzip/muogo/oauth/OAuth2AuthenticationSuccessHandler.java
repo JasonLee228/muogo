@@ -29,38 +29,45 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private final UserRepository userRepository;
 
     @Value("${custom.spoty-server.front.url}")
-    private String spotyServerFrontUrl;
+    private String frontUrl;
+
+    private static final String REDIRECT_URL = "/api/token?accessToken={value}&refreshToken={value}";
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
 
+        // 인증 객체에서 유저 정보 조회
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-        System.out.println("oAuth2User.getAttributes() = " + oAuth2User.getAttributes());
+        log.info("\t\t[OAuth2User.getAttributes()] = " + oAuth2User.getAttributes());
 
+        // DB 에서 현재 저장된 정보 조회
         Optional<User> optionalUser = userRepository.findByEmail(oAuth2User.getName());
-
         User user = optionalUser.get();
 
-        CreateTokenDto createTokenDto = CreateTokenDto.builder()
+        // 토큰 생성
+        CreateTokenDto createAccessTokenDto = CreateTokenDto.builder()
                 .userId(user.getId())
                 .email(user.getEmail())
                 .role(user.getRole())
                 .provider(user.getProviderId())
                 .build();
 
-        String accessToken = tokenService.createAccessToken(createTokenDto);
-        String refreshToken = tokenService.createAccessToken(createTokenDto);
+        CreateTokenDto createRefreshTokenDto = CreateTokenDto.builder()
+                .userId(user.getId())
+                .build();
+
+        String accessToken = tokenService.createAccessToken(createAccessTokenDto);
+        String refreshToken = tokenService.createRefreshToken(createRefreshTokenDto); // 별도 토큰 생성으로 변경 필요
 
         log.info("access Token: {}", accessToken);
         log.info("refresh Token: {}", refreshToken);
 
-        String url = spotyServerFrontUrl + "/api/token?accessToken={value}&refreshToken={value}";
+        // 반환 경로 - 변경 필요
+        String url = frontUrl + REDIRECT_URL;
 
         UriComponents uri = UriComponentsBuilder.fromHttpUrl(url)
                 .buildAndExpand(accessToken, refreshToken);
-
-        System.out.println("uri = " + uri);
 
         // 이렇게 반환할지
         getRedirectStrategy().sendRedirect(request, response, String.valueOf(uri));

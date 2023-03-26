@@ -54,18 +54,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = tokenService.getToken(request);
 
         try {
+            // 토큰 validate 확인
             tokenService.validateToken(token);
         } catch (BadCredentialsException | SignatureException | BaseException | ExpiredJwtException ex) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String email = tokenService.getEmail(token);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+        // 사용자의 아이디를 얻어오도록 함
+        String id = tokenService.getUUID(token).toString();
+        // 사용자 아이디로 데이터베이스 검색하여 가져올 수 있도록 함
+        UserDetails userDetails = userDetailsService.loadUserByUsername(id);
 
         // JWT 를 바탕으로 인증 객체 생성
         Authentication authToken = new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
         System.out.println("authToken = " + authToken);
+
         // SecurityContextHolder 에 저장
         SecurityContextHolder.getContext().setAuthentication(authToken);
 

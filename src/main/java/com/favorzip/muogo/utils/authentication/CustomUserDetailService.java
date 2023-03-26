@@ -33,9 +33,10 @@ public class CustomUserDetailService extends DefaultOAuth2UserService implements
     private final UserRepository userRepository;
     private final OptionalUtil optionalUtil;
 
+    // 사용자 일반 정보 조회용 메소드. 필요 없으면 삭제 예정
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Optional<User> optionalUser = userRepository.findByEmail(email);
+    public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
+        Optional<User> optionalUser = userRepository.findById(UUID.fromString(id));
         optionalUtil.ifEmptyThrowError(optionalUser, new NotFoundUser());
 
         User user = optionalUser.get();
@@ -49,15 +50,20 @@ public class CustomUserDetailService extends DefaultOAuth2UserService implements
 
         System.out.println("oauth2User.getAttributes() : " + oauth2User.getAttributes());
 
+        // 네이버 / 카카오 구분 인자 추출
         String provider = userRequest.getClientRegistration().getRegistrationId();
-        OAuth2UserInfo oAuth2UserInfo = of(oauth2User, provider, userRequest.getAccessToken().getTokenValue());
 
+        // 네이버인지, 카카오인지에 따라 추출값이 다르기 때문에 of 메소드를 통해 별도 추출
+        OAuth2UserInfo oAuth2UserInfo = of(oauth2User, provider);
+
+        // 사용자 이메일, 이름 등 추출
         String providerId = oAuth2UserInfo.getProviderId();
         String email = oAuth2UserInfo.getEmail();
         String userName = oAuth2UserInfo.getName();
         Role role;
         UUID id = UUID.randomUUID();
 
+        // 기존 가입된 유저인지 판별을 위해서 데이터베이스 검색
         Optional<User> user = userRepository.findByEmailAndProviderType(oAuth2UserInfo.getEmail(), provider);
 
         // 신규 회원가입
@@ -83,25 +89,28 @@ public class CustomUserDetailService extends DefaultOAuth2UserService implements
 
         }
 
-        // authentication 객체에 넣어준다.
+        // authentication 객체에 넣어준다. (인증)
         return new CustomUserDetails(id, email, role.toString(), oauth2User.getAttributes());
     }
 
-    private OAuth2UserInfo of(OAuth2User oauth2User, String provider, String accessToken) {
-
-        OAuth2UserInfo result = null;
+    private OAuth2UserInfo of(OAuth2User oauth2User, String provider) {
 
         log.info("this user provider is {}", provider);
 
+        // 네이버 유저 정보 추출
         if (provider.equals("naver")) {
 
-            result = new NaverUserInfo(oauth2User.getAttribute("response"));
-
-        } else if (provider.equals("kakao")) {
-
-            result = new KakaoUserInfo(oauth2User.getAttributes());
+            return new NaverUserInfo(oauth2User.getAttribute("response"));
 
         }
-        return result;
+        // 카카오 유저 정보 추출
+        else if (provider.equals("kakao")) {
+
+            return new KakaoUserInfo(oauth2User.getAttributes());
+
+        } else {
+            return null;
+        }
     }
+
 }

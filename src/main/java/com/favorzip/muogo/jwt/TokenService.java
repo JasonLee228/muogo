@@ -53,7 +53,7 @@ public class TokenService {
     private JwtBuilder createToken(CreateTokenDto dto) {
         return Jwts.builder()
                 .setHeaderParam("type", "JWT")
-                .setIssuer("SPOTY")
+                .setIssuer("Muogo")
                 .claim("id", dto.getUserId())
                 .claim("email", dto.getEmail())
                 .claim("role", dto.getRole())

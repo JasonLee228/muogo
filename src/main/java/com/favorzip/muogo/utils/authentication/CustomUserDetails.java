@@ -59,7 +59,7 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
     // spring principalName 으로 사용
     @Override
     public String getUsername() {
-        return username;
+        return id.toString();
     }
 
     @Override
