@@ -3,7 +3,6 @@ package com.favorzip.muogo.service;
 import com.favorzip.muogo.domain.user.Role;
 import com.favorzip.muogo.domain.user.User;
 import com.favorzip.muogo.dto.user.SocialJoinRequestDto;
-import com.favorzip.muogo.dto.user.UserResponseDto;
 import com.favorzip.muogo.exception.user.ConflictUser;
 import com.favorzip.muogo.jwt.TokenService;
 import com.favorzip.muogo.repository.UserRepository;

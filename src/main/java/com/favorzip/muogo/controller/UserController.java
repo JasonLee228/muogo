@@ -1,9 +1,12 @@
 package com.favorzip.muogo.controller;
 
+import com.favorzip.muogo.dto.user.ResUserDto;
 import com.favorzip.muogo.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -25,5 +28,11 @@ public class UserController {
         System.out.println("accessToken = " + accessToken);
         System.out.println("refreshToken = " + refreshToken);
 
+    }
+
+    @GetMapping("/info/{id}")
+    public ResUserDto getUserInfo(@RequestHeader("Authorization") String token, @PathVariable UUID id) {
+
+        return null;
     }
 }

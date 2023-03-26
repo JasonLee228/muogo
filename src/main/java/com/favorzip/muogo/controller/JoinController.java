@@ -27,7 +27,7 @@ public class JoinController {
 
         String token = tokenService.getToken(request);
         log.info("token = {}", token);
-//        userService.oauth2Join(dto);
+        userService.oauth2Join(dto);
         return ResponseEntity.ok("회원가입 완료!");
     }
 
